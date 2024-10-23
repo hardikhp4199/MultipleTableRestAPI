@@ -252,9 +252,3 @@ This project is licensed under the MIT License. You are free to use, modify, and
 This guide provides the steps to build a RESTful Web API in .NET 8 using the scaffolding method with Entity Framework Core. By following these steps, you can automatically generate models and `DbContext` from your existing database and focus on building the API logic.
 
 Feel free to explore the project and customize it as needed for your own use cases.
-
----
-
-### You can now paste this into your GitHub repository’s `README.md` file and push it.
-
-Let me know if you need further customization or edits for this file!
