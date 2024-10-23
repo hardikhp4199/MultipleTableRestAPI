@@ -1,3 +1,50 @@
+To create the two tables (`Author` and `Books`) in your database with primary key auto-increment functionality, you can follow these SQL scripts.
+
+Below is the SQL command to create the two tables with primary keys and the foreign key relationship between `Books` and `Author`:
+
+### SQL Script for Creating the Tables
+
+```sql
+USE Company;  -- Use your existing database
+
+-- Create the Author table with auto-increment for AuthorId
+CREATE TABLE Author (
+    AuthorId INT IDENTITY(1,1) NOT NULL PRIMARY KEY,  -- Auto-increment ID
+    AuthorName NVARCHAR(50) NOT NULL
+);
+
+-- Create the Books table with a foreign key reference to Author
+CREATE TABLE Books (
+    BookId INT IDENTITY(1,1) NOT NULL PRIMARY KEY,  -- Auto-increment ID starting at 11
+    BookName NVARCHAR(50) NOT NULL,
+    ReleaseDate DATE,
+    AuthorId INT NOT NULL,  -- Foreign key reference to Author table
+    CONSTRAINT FK_Books_Author FOREIGN KEY (AuthorId) 
+        REFERENCES Author (AuthorId)
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE
+);
+```
+
+### Key Notes:
+- **IDENTITY(1,1)**: Auto-increment in SQL Server. It starts at 1 and increments by 1 for each new row.
+- **FOREIGN KEY**: This ensures the relationship between the `Books` table and the `Author` table. The `ON DELETE CASCADE` and `ON UPDATE CASCADE` ensure that changes to the `Author` table propagate to the `Books` table.
+- **Primary Key Auto-increment**: The primary key `AuthorId` and `BookId` will automatically increment when you insert a new record.
+
+### Steps to Execute:
+
+1. Open **SQL Server Management Studio (SSMS)**.
+2. Connect to your SQL Server instance.
+3. Select your database, for example, `Company`.
+4. Open a new query window and paste the above SQL script.
+5. Click **Execute** to create the tables in your database.
+
+### After Executing:
+
+Once the tables are created, you can scaffold them into your .NET 8 Web API project using the scaffolding method (as discussed in the previous steps). 
+
+This is the initial database setup step required before generating your `DbContext` and model classes. Let me know if you need further guidance!
+
 # RESTful Web API in .NET 8 Using Entity Framework Core Scaffold
 
 This repository provides step-by-step instructions for building a RESTful Web API in .NET 8 using the scaffolding method of **Entity Framework Core**. With this approach, we will automatically generate `DbContext` and model classes based on an existing database.
@@ -40,8 +87,8 @@ These packages enable Entity Framework Core and allow us to scaffold the databas
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=YourDatabaseName;Trusted_Connection=True;"
-  }
+    "DBConnection": "Server=DESKTOP-RHER41Q; Database=Company; Trusted_Connection=True; TrustServerCertificate=True;"
+ }
 }
 ```
 
@@ -54,6 +101,8 @@ Now we will use the **Entity Framework Core Scaffold-DbContext** command to auto
 
 ```bash
 Scaffold-DbContext "Server=localhost;Database=YourDatabaseName;Trusted_Connection=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models -Context YourDbContextName -Force
+Or 
+ Scaffold-Dbcontext "Server=DESKTOP-RHER41Q; Database=Company;Trusted_Connection=True; TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models
 ```
 
 - `YourConnectionString`: The connection string to your database.
@@ -77,9 +126,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 // Register DbContext with SQL Server
+//way 1
 builder.Services.AddDbContext<YourDbContextName>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+
+// or 
+//way 2
+builder.Services.AddDbContext<CompanyContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DBConnection")));
 
 var app = builder.Build();
 
@@ -110,21 +164,7 @@ You can now create API controllers based on your scaffolded models. Visual Studi
 
 Visual Studio will generate the necessary CRUD operations for the selected model.
 
-### 7. Run Migrations (Optional)
-
-If you need to make changes to your database schema, you can use **migrations** to apply those changes.
-
-1. Run the following command to create an initial migration:
-   ```bash
-   Add-Migration InitialMigration
-   ```
-
-2. Apply the migration to your database:
-   ```bash
-   Update-Database
-   ```
-
-### 8. Run the Application
+### 7. Run the Application
 
 1. Press `F5` or click the **Run** button in Visual Studio to start your application.
 2. The API should be running on `https://localhost:5001` or `http://localhost:5000`, and you can use tools like **Postman** or **cURL** to interact with your API.
